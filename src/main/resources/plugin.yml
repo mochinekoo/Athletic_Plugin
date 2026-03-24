@@ -1,0 +1,4 @@
+name: Athletic_Plugin
+version: '1.0-SNAPSHOT'
+main: net.mochinekoserver.athletic_plugin.Main
+api-version: '1.20'
