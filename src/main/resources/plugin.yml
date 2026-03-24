@@ -2,3 +2,9 @@ name: Athletic_Plugin
 version: '1.0-SNAPSHOT'
 main: net.mochinekoserver.athletic_plugin.Main
 api-version: '1.20'
+
+commands:
+  hide:
+    description: プレイヤーを非表示にするコマンド
+  show:
+    description: プレイヤーを表示するコマンド
