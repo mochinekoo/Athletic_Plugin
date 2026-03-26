@@ -8,3 +8,13 @@ commands:
     description: プレイヤーを非表示にするコマンド
   show:
     description: プレイヤーを表示するコマンド
+  start_mytimer:
+    description: 自分のタイマーを開始させるコマンド
+  stop_mytimer:
+    description: 自分のタイマーを停止させるコマンド
+  start_globaltimer:
+    description: 全体のタイマーを開始させるコマンド
+    permission: net.mochinekoserver.athletic_plugin.start_globaltimer
+  stop_globaltimer:
+    description: 全体のタイマーを停止させるコマンド
+    permission: net.mochinekoserver.athletic_plugin.stop_globaltimer
