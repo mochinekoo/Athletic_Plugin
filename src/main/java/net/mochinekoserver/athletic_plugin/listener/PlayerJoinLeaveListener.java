@@ -1,6 +1,8 @@
 package net.mochinekoserver.athletic_plugin.listener;
 
 import net.mochinekoserver.athletic_plugin.manager.ScoreboardManager;
+import net.mochinekoserver.athletic_plugin.manager.TimeManager;
+import net.mochinekoserver.athletic_plugin.status.TimerStatus;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,9 +15,10 @@ public class PlayerJoinLeaveListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         ScoreboardManager scoreboardManager = ScoreboardManager.getInstance(player.getUniqueId());
+        TimeManager timeManager = TimeManager.getInstance(player.getUniqueId());
         scoreboardManager.setScoreboard();
-        if (ScoreboardManager.globalType == ScoreboardManager.BoardType.RUNNING) {
-            scoreboardManager.startTimer();
+        if (TimeManager.getStatus() == TimerStatus.RUNNING) {
+            timeManager.startTimer();
         }
     }
 
@@ -23,7 +26,8 @@ public class PlayerJoinLeaveListener implements Listener {
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         ScoreboardManager scoreboardManager = ScoreboardManager.getInstance(player.getUniqueId());
-        scoreboardManager.stopTimer();
+        TimeManager timeManager = TimeManager.getInstance(player.getUniqueId());
+        timeManager.stopTimer();
         ScoreboardManager.removeInstance(player.getUniqueId());
     }
 }

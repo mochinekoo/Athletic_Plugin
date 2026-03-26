@@ -1,6 +1,7 @@
 package net.mochinekoserver.athletic_plugin.manager;
 
 import net.mochinekoserver.athletic_plugin.Main;
+import net.mochinekoserver.athletic_plugin.status.TimerStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -18,7 +19,6 @@ import java.util.UUID;
 
 public class ScoreboardManager {
 
-    public static BoardType globalType = BoardType.WAITING;
     private static final Map<UUID, ScoreboardManager> board_map = new HashMap<>();
     private static final String SCOREBOARD_NAME = "Athletic";
     private static final String DISPLAY_NAME = ChatColor.AQUA + "Athletic";
@@ -28,10 +28,10 @@ public class ScoreboardManager {
     private final Scoreboard scoreboard;
     private final Objective objective;
     private BukkitTask task;
-    private BoardType type;
     private Map<Integer, Score> score_map;
-    private int timer = 0;
-    private BukkitTask timerTask = null;
+
+    //other
+    private final TimeManager timeManager;
 
     private ScoreboardManager(UUID uuid) {
         this.player = Bukkit.getOfflinePlayer(uuid);
@@ -39,7 +39,7 @@ public class ScoreboardManager {
         this.objective = new_scoreboard.registerNewObjective(SCOREBOARD_NAME, "dummy", DISPLAY_NAME);
         this.scoreboard = this.objective.getScoreboard();
         this.score_map = new HashMap<>();
-        this.type = BoardType.WAITING;
+        this.timeManager = TimeManager.getInstance(uuid);
 
         board_map.put(uuid, this);
     }
@@ -83,7 +83,7 @@ public class ScoreboardManager {
         resetScore();
         player_obj.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-        if (type == BoardType.WAITING) {
+        if (TimeManager.getStatus() == TimerStatus.WAITING) {
             //開始前
             player_obj.getScore("===============").setScore(30);
             player_obj.getScore(" ").setScore(29);
@@ -93,7 +93,7 @@ public class ScoreboardManager {
             player_obj.getScore("   ").setScore(25);
             player_obj.getScore("============").setScore(24);
         }
-        else if (type == BoardType.RUNNING) {
+        else if (TimeManager.getStatus() == TimerStatus.RUNNING) {
             //開始済み
             player_obj.getScore("===============").setScore(30);
             player_obj.getScore(" ").setScore(29);
@@ -116,10 +116,11 @@ public class ScoreboardManager {
             this.task = new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (globalType == BoardType.WAITING) {
+                    int timer = timeManager.getTimer();
+                    if (TimeManager.getStatus() == TimerStatus.WAITING) {
                         getScore(26).updateScore(ChatColor.GOLD + "現在の人数：" + Bukkit.getOnlinePlayers().size());
                     }
-                    else if (type == BoardType.RUNNING) {
+                    else if (TimeManager.getStatus() == TimerStatus.RUNNING) {
                         int hour = timer / 60 / 60;
                         int min = timer / 60;
                         int sec = timer % 60;
@@ -133,27 +134,6 @@ public class ScoreboardManager {
                 }
             }.runTaskTimer(Main.getPlugin(Main.class), 0L, 2L);
         }
-    }
-
-    public void startTimer() {
-        if (timerTask != null) return;
-        type = BoardType.RUNNING;
-        setScoreboard();
-
-        timerTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (type == BoardType.RUNNING) {
-                    timer++;
-                }
-            }
-        }.runTaskTimer(Main.getPlugin(Main.class), 0L, 20L);
-    }
-
-    public void stopTimer() {
-        if (timerTask == null) return;
-        timerTask.cancel();
-        timerTask = null;
     }
 
     /**
@@ -185,14 +165,6 @@ public class ScoreboardManager {
 
     public BukkitTask getTask() {
         return task;
-    }
-
-    public void setType(BoardType type) {
-        this.type = type;
-    }
-
-    public BoardType getType() {
-        return type;
     }
 
     public static class Score {
@@ -229,11 +201,6 @@ public class ScoreboardManager {
             this.name = name;
             objective.getScore(name).setScore(score);
         }
-    }
-
-    public enum BoardType {
-        WAITING,
-        RUNNING
     }
 
 }
